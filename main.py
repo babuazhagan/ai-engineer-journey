@@ -1,42 +1,39 @@
 import ollama
 
-def summarize_text(text):
+# Conversation memory
+messages = [
+    {
+        "role": "system",
+        "content": "You are a helpful personal AI assistant. Keep responses concise."
+    }
+]
+
+print("AI Agent started. Type 'exit' to quit.\n")
+
+while True:
+    user_input = input("You: ")
+
+    if user_input.lower() == "exit":
+        break
+
+    # Add user message to memory
+    messages.append({
+        "role": "user",
+        "content": user_input
+    })
+
+    # Send full conversation to model
     response = ollama.chat(
-        model='mistral',
-        messages=[
-            {
-                'role': 'system',
-                'content': (
-                    "You are a precise summarization assistant. "
-                    "Return exactly 5 bullet points. "
-                    "Each bullet must start with a hyphen and a space. "
-                    "No extra commentary."
-                )
-            },
-            {
-                'role': 'user',
-                'content': text
-            }
-        ]
+        model="mistral",
+        messages=messages
     )
 
-    return response['message']['content']
+    assistant_reply = response["message"]["content"]
 
+    print("\nAI:", assistant_reply, "\n")
 
-
-if __name__ == "__main__":
-    print("Paste text to summarize. Press Enter twice when done:\n")
-
-    lines = []
-    while True:
-        line = input()
-        if line == "":
-            break
-        lines.append(line)
-
-    full_text = "\n".join(lines)
-
-    summary = summarize_text(full_text)
-
-    print("\n=== SUMMARY ===\n")
-    print(summary)
+    # Add assistant reply to memory
+    messages.append({
+        "role": "assistant",
+        "content": assistant_reply
+    })
